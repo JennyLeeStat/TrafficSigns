@@ -34,6 +34,7 @@ def download_and_unzip(url, dest_dir, training_file, validation_file, testing_fi
     logging.info("from url: {}".format(url))
     logging.info("successfully downloaded and uncompressed")
 
+    #os.remove(zipped_file)
 
 
 
