@@ -3,6 +3,9 @@ import sys
 import urllib.request
 import zipfile
 import logging
+from collections import Counter
+import pandas as pd
+
 
 logging.basicConfig(
     format='%(levelname)s %(message)s',
@@ -32,9 +35,28 @@ def download_and_unzip(url, dest_dir, training_file, validation_file, testing_fi
 
     logging.info("Data set {}, {}, {}".format(training_file, validation_file, testing_file))
     logging.info("from url: {}".format(url))
-    logging.info("successfully downloaded and uncompressed")
+    logging.info("successfully downloaded and unzipped")
 
     #os.remove(zipped_file)
 
+
+def get_label_dist(train, valid, test):
+    train_ratio, valid_ratio, test_ratio = {}, {}, {}
+    three_labels = [ train, valid, test ]
+    three_ratios = [ train_ratio, valid_ratio, test_ratio ]
+
+    for i, label in enumerate(three_labels):
+        n_total = len(label)
+        tmp_count = Counter(label)
+        for k, v in tmp_count.items():
+            three_ratios[ i ][ k ] = tmp_count[ k ] / n_total
+
+        three_ratios[ i ] = pd.DataFrame.from_dict(three_ratios[ i ], 'index')
+        three_ratios[ i ] = three_ratios[ i ].sort_index()
+
+    dist_table = pd.concat([ three_ratios[ 0 ], three_ratios[ 1 ], three_ratios[ 2 ] ], axis=1)
+    dist_table.columns = [ 'train', 'valid', 'test' ]
+
+    return dist_table
 
 
