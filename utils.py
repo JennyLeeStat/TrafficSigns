@@ -33,11 +33,25 @@ def download_and_unzip(url, dest_dir, training_file, validation_file, testing_fi
         zipfile.ZipFile(zipped_file, 'r').extractall(dest_dir)
         logging.info("{} is successfully unzipped".format(zipped_file))
 
-    logging.info("Data set {}, {}, {}".format(training_file, validation_file, testing_file))
+    logging.info("Data set \n{}, \n{}, \n{}".format(training_file, validation_file, testing_file))
     logging.info("from url: {}".format(url))
     logging.info("successfully downloaded and unzipped")
 
     #os.remove(zipped_file)
+
+def get_stats(X, y, dataset_name):
+    n = X.shape[0]
+    image_shape = X.shape[1:]
+    n_classes = len(set(y))
+    print("====================================")
+    print("Dataset: {} ".format(dataset_name))
+    print("Number of examples: {}".format(n))
+    print("Image data shape: {}".format(image_shape))
+    print("Min: {}".format(X.min()))
+    print("Max: {}".format(X.max()))
+    print("Mean: {:.4f}".format(X.mean()))
+    print("Std Dev: {:.4f}".format(X.var() ** 0.5))
+    print("Number of classes: {}".format(len(set(y))))
 
 
 def get_label_dist(train, valid, test):
