@@ -39,10 +39,16 @@ def download_and_unzip(url, dest_dir, training_file, validation_file, testing_fi
 
     #os.remove(zipped_file)
 
-def get_stats(X, y, dataset_name):
-    n = X.shape[0]
-    image_shape = X.shape[1:]
-    n_classes = len(set(y))
+
+def get_stats(X, y, dataset_name, is_one_hot=False):
+    n = X.shape[ 0 ]
+    image_shape = X.shape[ 1: ]
+
+    if is_one_hot:
+        n_classes = y.shape[ 1 ]
+    else:
+        n_classes = len(set(y))
+
     print("====================================")
     print("Dataset: {} ".format(dataset_name))
     print("Number of examples: {}".format(n))
@@ -51,8 +57,7 @@ def get_stats(X, y, dataset_name):
     print("Max: {}".format(X.max()))
     print("Mean: {:.4f}".format(X.mean()))
     print("Std Dev: {:.4f}".format(X.var() ** 0.5))
-    print("Number of classes: {}".format(len(set(y))))
-
+    print("Number of classes: {}".format(n_classes))
 
 def get_label_dist(train, valid, test):
     train_ratio, valid_ratio, test_ratio = {}, {}, {}
