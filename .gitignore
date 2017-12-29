@@ -9,8 +9,6 @@
 
 *.zip
 
-*.png
-
 *.hdf5
 
 *.pbtxt
