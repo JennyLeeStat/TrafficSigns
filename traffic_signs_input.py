@@ -1,10 +1,21 @@
+import sys
 import numpy as np
 import random
 import pickle
 import keras.preprocessing.image as io
-
+from sklearn.utils import shuffle
+import cv2
+import utils
 
 BATCH_SIZE = 16
+
+def convert_to_grayscale(x):
+    return cv2.cvtColor(x, cv2.COLOR_RGB2GRAY)
+
+
+def convert_to_grayscale_3d(x):
+    x = cv2.cvtColor(x, cv2.COLOR_RGB2GRAY)
+    return np.expand_dims(x, 2)
 
 
 def one_hot_encode(x, n_classes=43):
@@ -53,39 +64,6 @@ def random_transform(x, seed=42, rotation_range=40,
     return x
 
 
-def augment_examples(X, y, dist_table, s=1, is_train=True):
-    if is_train:
-        n_train = len(y)
-        count = dist_table[ 'train' ] * n_train
-        count = np.array(count, dtype=np.int)
-        weights = [ s * np.ceil(max(1, 50000 / c)) for c in count ]
-
-    else:
-        n_valid = len(y)
-        count = dist_table[ 'valid' ] * n_valid
-        count = np.array(count, dtype=np.int)
-        weights = [ s * np.ceil(max(1, 20000 / c)) for c in count ]
-
-
-    X_augmented = [ ]
-    y_augmented = [ ]
-
-    for i, feature in enumerate(X):
-
-        n_transform = int(weights[ y[ i ] ])
-        for n in range(n_transform):
-            image = global_contrast_normalization(feature)
-            image = minmax_normalization(image)
-            image = random_transform(image)
-            X_augmented.append(image)
-            y_augmented.append(y[ i ])
-
-    X_augmented = np.array(X_augmented).reshape(len(X_augmented), 32, 32, 3)
-    y_augmented = one_hot_encode(y_augmented)
-    print("Number of augmented training dataset: {}".format(len(X_augmented)))
-
-    return X_augmented, y_augmented
-
 
 def preprocess_and_save(features, labels, dest):
     preprocessed = [ ]
@@ -99,3 +77,48 @@ def preprocess_and_save(features, labels, dest):
     pickle.dump((preprocessed, encoded_label), open(dest, 'wb'))
 
     return preprocessed, encoded_label
+
+
+def augment_examples(X, y, s=1, is_color=True,
+                     dataset_name="", random_state=42):
+    '''
+    
+    :param X: list of 3D image dataset, shape = (r, c, channel)
+    :param y: labels
+    :param s: integer scale factor 
+    :param is_color: 
+    :param dataset_name: name of dataset being boosted  
+    :param random_state
+    :return: len(X) * s number of boosted examples
+    '''
+    n = len(y)
+    n_channel = X[0].shape[-1]
+    X_augmented = [ ]
+    y_augmented = [ ]
+
+
+    for i, image in enumerate(X):
+        sys.stdout.write('\r>> Augmenting image %s (%.1f%%)' % (
+            str(i), float(i + 1) / float(n) * 100.0))
+        sys.stdout.flush()
+
+        for j in range(s):
+            if n_channel == 3: # color examples
+                image = global_contrast_normalization(image)
+                image = random_transform(image)
+                image = minmax_normalization(image)
+
+            if n_channel == 1: # grayscale examples
+                image = random_transform(image)
+                image = minmax_normalization(image)
+
+            X_augmented.append(image)
+            y_augmented.append(y[ i ])
+
+    X_augmented = np.array(X_augmented).reshape(len(X_augmented), 32, 32, n_channel )
+    X_augmented, y_augmented = shuffle(X_augmented, y_augmented, random_state=random_state)
+
+    #     print("\nNumber of examples after augmentation : {}".format(len(X_augmented)))
+    utils.get_stats(X_augmented, y_augmented, dataset_name)
+
+    return X_augmented, y_augmented

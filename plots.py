@@ -9,19 +9,33 @@ import traffic_signs_input as input_
 sign_names = pd.read_csv("signnames.csv")
 
 
-def display_square_grid(features, n=5, normalize=False):
-    plt.figure(figsize=(n, n))
-    images = features[: n * n]
+def display_square_grid(features, normalize=False, greys=False):
+    plt.figure(figsize=(16, 9))
+    images = features[ : 16 * 9 ]
 
     for i, _ in enumerate(images):
-        plt.subplot(n, n, i + 1)
+        plt.subplot(9, 16, i + 1)
         plt.xticks(())
         plt.yticks(())
         image = images[ i ]
-        if normalize:
+
+        if greys and not normalize:
+            image = input_.convert_to_grayscale(image)
+            plt.imshow(image, cmap='Greys')
+
+        if not greys and normalize:
             image = input_.global_contrast_normalization(image)
             image = input_.minmax_normalization(image)
-        plt.imshow(image)
+            plt.imshow(image)
+
+        if greys and normalize:
+            image = input_.convert_to_grayscale(image)
+            image = input_.global_contrast_normalization(image)
+            image = input_.minmax_normalization(image)
+            plt.imshow(image, cmap='Greys')
+
+        if not greys and not normalize:
+            plt.imshow(image)
 
     plt.subplots_adjust(wspace=0, hspace=0)
     plt.show()

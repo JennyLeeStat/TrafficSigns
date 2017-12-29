@@ -49,7 +49,7 @@ def get_stats(X, y, dataset_name, is_one_hot=False):
     else:
         n_classes = len(set(y))
 
-    print("====================================")
+    print("\n====================================")
     print("Dataset: {} ".format(dataset_name))
     print("Number of examples: {}".format(n))
     print("Image data shape: {}".format(image_shape))
