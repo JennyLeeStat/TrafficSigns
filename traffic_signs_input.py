@@ -205,7 +205,7 @@ def prepare_arugment_dataset(is_color=True, s=8):
         y_train_large_color = np.concatenate((y_train_color, y_train_augmented_color), axis=0)
         X_train_large_color, y_train_large_color = shuffle(X_train_large_color, y_train_large_color, random_state=42)
         utils.get_stats(X_train_large_color, y_train_large_color, "Original + Train_augmented (color)")
-        return X_train_large_color, y_train_large_color
+        return X_train_large_color, y_train_large_color, X_valid_color, y_valid_color
 
     if not is_color:
 
@@ -215,4 +215,4 @@ def prepare_arugment_dataset(is_color=True, s=8):
         y_train_large_gray = np.concatenate((y_train_gray, y_train_augmented_gray), axis=0)
         X_train_large_gray, y_train_large_gray = shuffle(X_train_large_gray, y_train_large_gray, random_state=42)
         utils.get_stats(X_train_large_gray, y_train_large_gray, "Original + Train_augmented (gray)")
-        return X_train_large_gray, y_train_large_gray
+        return X_train_large_gray, y_train_large_gray, X_valid_gray, y_valid_gray
