@@ -59,23 +59,12 @@ def get_stats(X, y, dataset_name, is_one_hot=False):
     print("Std Dev: {:.4f}".format(X.var() ** 0.5))
     print("Number of classes: {}".format(n_classes))
 
-def get_label_dist(train, valid, test):
-    train_ratio, valid_ratio, test_ratio = {}, {}, {}
-    three_labels = [ train, valid, test ]
-    three_ratios = [ train_ratio, valid_ratio, test_ratio ]
 
-    for i, label in enumerate(three_labels):
-        n_total = len(label)
-        tmp_count = Counter(label)
-        for k, v in tmp_count.items():
-            three_ratios[ i ][ k ] = tmp_count[ k ] / n_total
+def get_label_dist(labels):
+    ratio = {}
+    tmp_count = Counter(labels)
+    for k, v in tmp_count.items():
+        ratio[ k ] = 100 * tmp_count[ k ] / len(labels)
 
-        three_ratios[ i ] = pd.DataFrame.from_dict(three_ratios[ i ], 'index')
-        three_ratios[ i ] = three_ratios[ i ].sort_index()
-
-    dist_table = pd.concat([ three_ratios[ 0 ], three_ratios[ 1 ], three_ratios[ 2 ] ], axis=1)
-    dist_table.columns = [ 'train', 'valid', 'test' ]
-
-    return dist_table
-
-
+    ratio = pd.DataFrame.from_dict(ratio, 'index').sort_index()
+    return ratio

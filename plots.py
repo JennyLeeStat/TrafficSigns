@@ -1,9 +1,11 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-import cv2
+from sklearn.metrics import confusion_matrix
 import keras.preprocessing.image as io
 import traffic_signs_input as inputs
+
 
 
 def display_square_grid(features, normalize=False, greys=False):
@@ -61,6 +63,30 @@ def display_w_labels(X, label, sign_names):
     return first_43
 
 
+def get_label_dist(labels):
+    ratio = {}
+    tmp_count = Counter(labels)
+    for k, v in tmp_count.items():
+        ratio[ k ] = 100 * tmp_count[ k ] / len(labels)
+
+    ratio = pd.DataFrame.from_dict(ratio, 'index').sort_index()
+    return ratio
+
+
+def show_label_dist(y_train, y_valid, y_test):
+    train_ratio = get_label_dist(y_train)
+    valid_ratio = get_label_dist(y_valid)
+    test_ratio = get_label_dist(y_test)
+
+    dist_table = pd.concat([ train_ratio, valid_ratio, test_ratio ], axis=1)
+    dist_table.columns = [ 'train', 'valid', 'test' ]
+    ax = dist_table.plot(kind='bar', figsize=(8, 4.5))
+    ax.set_ylabel('Ratio (%)', fontsize=12)
+    ax.set_xlabel('Class labels', fontsize=12)
+    ax.set_title('Class label distributions for three datasets', fontsize=17);
+
+
+
 def compare_preprocessing_methods(img):
     plt.figure(figsize=(8, 4.5))
     plt.subplot(1, 4, 1)
@@ -78,7 +104,7 @@ def compare_preprocessing_methods(img):
     plt.subplot(1, 4, 3)
     plt.xticks(())
     plt.yticks(())
-    plt.title("Grayscale \nand normalized")
+    plt.title("Grayscale \nand GCN")
     image = inputs.convert_to_grayscale_3d(img)
     image = inputs.global_contrast_normalization(image)
     image = inputs.minmax_normalization(image)
@@ -87,10 +113,11 @@ def compare_preprocessing_methods(img):
     plt.subplot(1, 4, 4)
     plt.xticks(())
     plt.yticks(())
-    plt.title("Normalized")
+    plt.title("GCN")
     gcn = inputs.global_contrast_normalization(img)
     mm = inputs.minmax_normalization(gcn)
     plt.imshow(mm);
+
 
 def show_preprocessed_example(X_train):
     x = X_train[5]
@@ -143,18 +170,16 @@ def show_preprocessed_example(X_train):
     plt.show()
 
 
-def display_sample_images(path1, path2, path3, path4, path5):
 
-    blank = np.zeros((32, 32 * 5))
-    for i in range(5):
-        img = plt.imshow(path1)
-        resized = cv2.resize(img, (32, 32))
-        blank[:, 32*i: 32 * (i + 1)] = resized
-
-    return blank
-
-path_1 = 'images/test_1.png'
-path_2 = 'images/test_2.png'
-path_3 = 'images/test_3.png'
-path_4 = 'images/test_4.png'
-path_5 = 'images/test_5.png'
+def display_conf_matrix(final_test_stats):
+    plt.figure(figsize=(10, 10))
+    conf_mat = confusion_matrix(final_test_stats[ 'true_labels' ], final_test_stats[ 'preds' ])
+    norm_conf_mat = conf_mat / conf_mat.sum(axis=1)
+    np.fill_diagonal(norm_conf_mat, 0)
+    plt.matshow(norm_conf_mat, fignum=1)
+    plt.xticks(list(range(43)))
+    plt.yticks(list(range(43)))
+    plt.xlabel("Predicted labels", fontweight='bold')
+    plt.ylabel("True labels", fontweight='bold')
+    plt.title("Normalized confusion matrix (TP set zero)")
+    plt.show()
