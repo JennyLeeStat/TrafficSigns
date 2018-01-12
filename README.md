@@ -334,11 +334,6 @@ with black picture in them.
 
 
 
-
-
-
----
-
 # Test a Model on New Images
 
 #### 1. Five German traffic signs found on the web
@@ -367,11 +362,6 @@ training dataset could make the classification harder.
 
 
 #### 2. Top predictions by model
-Discuss the model's predictions on these new traffic signs and 
-compare the results to predicting on the test set. 
-At a minimum, discuss what the predictions were, 
-the accuracy on these new predictions, 
-and compare the accuracy to the accuracy on the test set 
 
 Here are the results of the prediction:
 
